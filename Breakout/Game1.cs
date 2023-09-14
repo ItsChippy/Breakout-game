@@ -11,7 +11,9 @@ namespace Breakout
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        //player and player stats
         Player player;
+        int points;
 
         //variables for the ball
         Ball ball;
@@ -19,6 +21,7 @@ namespace Breakout
         Vector2 ballStartingDirection;
 
         //variables for the brick
+        Brick brick;
         Vector2 brickStartingPosition;
         List<Brick> bricks = new List<Brick>();
 
@@ -32,39 +35,39 @@ namespace Breakout
 
         protected override void Initialize()
         {
+            //initializing the point counter
+            points = 0;
 
             int centerPosition = Window.ClientBounds.Width / 2;
-            
+
+            //initializing the bricks
+            Texture2D brickTexture = Content.Load<Texture2D>(@"brick");
+            brickStartingPosition = Vector2.Zero;
+
+            //changing window size to fit the bricks
+            _graphics.PreferredBackBufferWidth = brickTexture.Width * 14;
+            _graphics.ApplyChanges();
+
+            //fills top part of the screen with bricks
+            for (int i = 0; i < 14; i++)
+            {
+                brick = new Brick(brickTexture, brickStartingPosition);
+                bricks.Add(brick);
+                brickStartingPosition.X += brickTexture.Width;
+            }
+
+
             //initializing the player block
             Texture2D playerTexture = Content.Load<Texture2D>(@"player");
-
             int centerPlayerPosition = centerPosition - playerTexture.Width / 2;
             player = new Player(playerTexture, new Vector2(centerPlayerPosition, 400));
 
             //initializing the ball
             Texture2D ballTexture = Content.Load<Texture2D>(@"ball");
-
             ballStartingPosition = new Vector2(centerPlayerPosition, 350);
             ball = new Ball(ballTexture, ballStartingPosition);
 
             ballStartingDirection = new Vector2(1, -1);
-
-            //initializing the bricks
-            Texture2D brickTexture = Content.Load<Texture2D>(@"brick");
-            brickStartingPosition = Vector2.Zero;
-            
-            //adding the first brick
-            Brick brick = new Brick(brickTexture, brickStartingPosition);
-            bricks.Add(brick);
-
-            //fills the top part of the screen with bricks after the first one
-            while (brickTexture.Width + brickStartingPosition.X <= Window.ClientBounds.X)
-            {
-                brickStartingPosition.X += brickTexture.Width + 10;
-                brick = new Brick(brickTexture, brickStartingPosition);
-                bricks.Add(brick);
-            }
-            
 
             base.Initialize();
         }
@@ -72,18 +75,24 @@ namespace Breakout
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            
+            SpriteFont spriteFont;
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            //fixes cursor to player block
+            Mouse.SetPosition((int)player.position.X, (int)player.position.Y);
+
             var keys = Keyboard.GetState();
             var mouse = Mouse.GetState();
 
+            //console title
+            Window.Title = $"Breakout {points} points";
+
             //player movement
-            player.Move(keys, Window.ClientBounds.Width);
+            player.Move(mouse, keys, Window.ClientBounds.Width);
             player.UpdateRectanglePosition();
 
             //ball movement
@@ -101,9 +110,13 @@ namespace Breakout
             {
                 ball.movementX *= -1;
             }
-            if (ball.position.Y < 0 || ball.position.Y + ball.texture.Height > Window.ClientBounds.Height)
+            if (ball.position.Y < 0)
             {
                 ball.movementY *= -1;
+            }
+            if (ball.position.Y + ball.texture.Height >  Window.ClientBounds.Height)
+            {
+                Exit();
             }
 
             //collision between ball and bricks
@@ -112,8 +125,9 @@ namespace Breakout
                 if (bricks[index].rect.Intersects(ball.rect))
                 {
                     bricks[index].isAlive = false;
-                    ball.movementY *= -1;
                     bricks.RemoveAt(index);
+                    ball.movementY *= -1;
+                    points++;
                 }
             }
 

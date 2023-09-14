@@ -27,13 +27,13 @@ namespace Breakout
             sprite.Draw(texture, position, Microsoft.Xna.Framework.Color.White);
         }
 
-        public void Move(KeyboardState keys, int width)
+        public void Move(MouseState mouse, KeyboardState keys, int width)
         {
-            if (keys.IsKeyDown(Keys.D) && position.X + texture.Width <= width)
+            if (keys.IsKeyDown(Keys.Right) && position.X + texture.Width <= width)
             {
                 position.X += playerSpeed;
             }
-            if (keys.IsKeyDown(Keys.A) && position.X >= 0)
+            if (keys.IsKeyDown(Keys.Left) && position.X >= 0)
             {
                 position.X -= playerSpeed;
             }
