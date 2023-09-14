@@ -3,9 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,29 +12,37 @@ namespace Breakout
     internal class Player : BaseGameObject
     {
         private float playerSpeed = 8f;
+        MouseState mouse;
+        Vector2 direction;
         
-        
-        public Player(Texture2D texture, Microsoft.Xna.Framework.Vector2 position) : base(texture, position)
+        public Player(Texture2D texture, Vector2 position) : base(texture, position)
         {
             this.texture = texture;
             this.position = position;
+            direction = new Vector2(mouse.X, position.Y);
         }
 
         public void Draw(SpriteBatch sprite)
         {
-            sprite.Draw(texture, position, Microsoft.Xna.Framework.Color.White);
+            sprite.Draw(texture, position, Color.White);
         }
 
-        public void Move(MouseState mouse, KeyboardState keys, int width)
+        public void Move(KeyboardState keys, int width)
         {
-            if (keys.IsKeyDown(Keys.Right) && position.X + texture.Width <= width)
+            mouse = Mouse.GetState();
+            if (mouse.X + texture.Width <= width || mouse.X >=0)
             {
-                position.X += playerSpeed;
+                direction = new Vector2(mouse.X, position.Y);
+                position = direction;
             }
-            if (keys.IsKeyDown(Keys.Left) && position.X >= 0)
-            {
-                position.X -= playerSpeed;
-            }
+            //if (keys.IsKeyDown(Keys.Right) && position.X + texture.Width <= width)
+            //{
+            //    position.X += playerSpeed;
+            //}
+            //if (keys.IsKeyDown(Keys.Left) && position.X >= 0)
+            //{
+            //    position.X -= playerSpeed;
+            //}
         }
 
     }

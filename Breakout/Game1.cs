@@ -19,6 +19,7 @@ namespace Breakout
         Ball ball;
         Vector2 ballStartingPosition;
         Vector2 ballStartingDirection;
+        Random randomDirection = new Random();
 
         //variables for the brick
         Brick brick;
@@ -30,7 +31,7 @@ namespace Breakout
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            IsMouseVisible = false;
         }
 
         protected override void Initialize()
@@ -75,24 +76,20 @@ namespace Breakout
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            SpriteFont spriteFont;
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            //fixes cursor to player block
-            Mouse.SetPosition((int)player.position.X, (int)player.position.Y);
 
             var keys = Keyboard.GetState();
-            var mouse = Mouse.GetState();
 
             //console title
             Window.Title = $"Breakout {points} points";
 
             //player movement
-            player.Move(mouse, keys, Window.ClientBounds.Width);
+            player.Move(keys, Window.ClientBounds.Width);
             player.UpdateRectanglePosition();
 
             //ball movement
@@ -102,6 +99,8 @@ namespace Breakout
             //collision between player and ball
             if (player.rect.Intersects(ball.rect))
             {
+                double randomBounce = randomDirection.Next(1, 6);
+                ball.movementX = (float)randomBounce * -1;
                 ball.movementY *= -1;
             }
 
