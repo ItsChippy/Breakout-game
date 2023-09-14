@@ -18,6 +18,11 @@ namespace Breakout
         Vector2 ballStartingPosition;
         Vector2 ballStartingDirection;
 
+        //variables for the brick
+        Vector2 brickStartingPosition;
+        List<Brick> bricks = new List<Brick>();
+
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -42,6 +47,23 @@ namespace Breakout
             ball = new Ball(ballTexture, ballStartingPosition);
 
             ballStartingDirection = new Vector2(1, -1);
+
+            //initializing the bricks
+            Texture2D brickTexture = Content.Load<Texture2D>(@"brick");
+            brickStartingPosition = Vector2.Zero;
+            
+            //adding the first brick
+            Brick brick = new Brick(brickTexture, brickStartingPosition);
+            bricks.Add(brick);
+
+            //fills the top part of the screen with bricks after the first one
+            while (brickTexture.Width + brickStartingPosition.X <= Window.ClientBounds.X)
+            {
+                brickStartingPosition.X += brickTexture.Width + 10;
+                brick = new Brick(brickTexture, brickStartingPosition);
+                bricks.Add(brick);
+            }
+            
 
             base.Initialize();
         }
@@ -81,6 +103,11 @@ namespace Breakout
             _spriteBatch.Begin();
             player.Draw(_spriteBatch);
             ball.Draw(_spriteBatch);
+
+            foreach (var brick in bricks)
+            {
+                brick.Draw(_spriteBatch);
+            }
             _spriteBatch.End();
 
             base.Draw(gameTime);

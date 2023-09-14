@@ -42,12 +42,5 @@ namespace Breakout
             }
         }
 
-        public Microsoft.Xna.Framework.Rectangle GetRectangle()
-        {
-            Microsoft.Xna.Framework.Rectangle rectangle = new((int)position.X, (int)position.Y, texture.Width, texture.Height);
-
-            return rectangle;
-        }
-
     }
 }
