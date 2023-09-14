@@ -10,8 +10,7 @@ namespace Breakout
 {
     internal class Brick : BaseGameObject
     {
-        
-
+        public bool isAlive = true;
         public Brick(Texture2D texture, Vector2 position) : base(texture, position)
         {
             this.texture = texture;

@@ -92,7 +92,7 @@ namespace Breakout
 
             //collision between player and ball
             if (player.rect.Intersects(ball.rect))
-            {;
+            {
                 ball.movementY *= -1;
             }
 
@@ -104,6 +104,17 @@ namespace Breakout
             if (ball.position.Y < 0 || ball.position.Y + ball.texture.Height > Window.ClientBounds.Height)
             {
                 ball.movementY *= -1;
+            }
+
+            //collision between ball and bricks
+            for (int index = 0; index < bricks.Count; index++)
+            {
+                if (bricks[index].rect.Intersects(ball.rect))
+                {
+                    bricks[index].isAlive = false;
+                    ball.movementY *= -1;
+                    bricks.RemoveAt(index);
+                }
             }
 
             base.Update(gameTime);
@@ -119,7 +130,10 @@ namespace Breakout
 
             foreach (var brick in bricks)
             {
-                brick.Draw(_spriteBatch);
+                if (brick.isAlive)
+                {
+                    brick.Draw(_spriteBatch);
+                }
             }
             _spriteBatch.End();
 
