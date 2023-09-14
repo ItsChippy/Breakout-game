@@ -17,7 +17,6 @@ namespace Breakout
         Ball ball;
         Vector2 ballStartingPosition;
         Vector2 ballStartingDirection;
-        Random randomCollisionDirection;
 
         //variables for the brick
         Vector2 brickStartingPosition;
@@ -83,16 +82,21 @@ namespace Breakout
             var keys = Keyboard.GetState();
             var mouse = Mouse.GetState();
 
+            //player movement
             player.Move(keys, Window.ClientBounds.Width);
-            ball.Move(ballStartingDirection);
+            player.UpdateRectanglePosition();
 
+            //ball movement
+            ball.Move(ballStartingDirection);
+            ball.UpdateRectanglePosition();
+
+            //collision between player and ball
             if (player.rect.Intersects(ball.rect))
-            {
-                ball.movementX = randomCollisionDirection.Next(0, 0);
-                ball.movementY = randomCollisionDirection.Next(0, 10);
+            {;
+                ball.movementY *= -1;
             }
 
-
+            //collision between ball and screen
             if (ball.position.X < 0 || ball.position.X + ball.texture.Width > Window.ClientBounds.Width)
             {
                 ball.movementX *= -1;
@@ -101,8 +105,6 @@ namespace Breakout
             {
                 ball.movementY *= -1;
             }
-
-
 
             base.Update(gameTime);
         }

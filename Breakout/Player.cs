@@ -29,7 +29,6 @@ namespace Breakout
 
         public void Move(KeyboardState keys, int width)
         {
-            UpdateRectanglePosition();
             if (keys.IsKeyDown(Keys.D) && position.X + texture.Width <= width)
             {
                 position.X += playerSpeed;

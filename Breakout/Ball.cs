@@ -11,7 +11,7 @@ namespace Breakout
     internal class Ball : BaseGameObject
     {
 
-        public float speed = 5f;
+        public float speed = 4f;
         public float movementX;
         public float movementY;
 
@@ -31,7 +31,6 @@ namespace Breakout
 
         public void Move(Vector2 direction)
         {
-            UpdateRectanglePosition();
             position.X += direction.X * movementX;
             position.Y += direction.Y * movementY;
         }
