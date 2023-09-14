@@ -11,14 +11,12 @@ using System.Threading.Tasks;
 
 namespace Breakout
 {
-    internal class Player
+    internal class Player : BaseGameObject
     {
         private float playerSpeed = 8f;
         
-        Texture2D texture;
-        Microsoft.Xna.Framework.Vector2 position;
         
-        public Player(Texture2D texture, Microsoft.Xna.Framework.Vector2 position) 
+        public Player(Texture2D texture, Microsoft.Xna.Framework.Vector2 position) : base(texture, position)
         {
             this.texture = texture;
             this.position = position;
@@ -31,7 +29,7 @@ namespace Breakout
 
         public void Move(KeyboardState keys, int width)
         {
-
+            UpdateRectanglePosition();
             if (keys.IsKeyDown(Keys.D) && position.X + texture.Width <= width)
             {
                 position.X += playerSpeed;

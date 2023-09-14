@@ -8,22 +8,20 @@ using System.Threading.Tasks;
 
 namespace Breakout
 {
-    internal class Ball
+    internal class Ball : BaseGameObject
     {
-        public Texture2D texture;
-        public Vector2 position;
 
         public float speed = 5f;
-        public float speedX;
-        public float speedY;
+        public float movementX;
+        public float movementY;
 
-        public Ball(Texture2D texture, Vector2 position)
+        public Ball(Texture2D texture, Vector2 position) : base(texture, position)
         {
             this.texture = texture;
             this.position = position;
 
-            speedX = speed;
-            speedY = speed;
+            movementX = speed;
+            movementY = speed;
         }
 
         public void Draw(SpriteBatch sprite)
@@ -33,8 +31,9 @@ namespace Breakout
 
         public void Move(Vector2 direction)
         {
-            position.X += direction.X * speedX;
-            position.Y += direction.Y * speedY;
+            UpdateRectanglePosition();
+            position.X += direction.X * movementX;
+            position.Y += direction.Y * movementY;
         }
     }
 }

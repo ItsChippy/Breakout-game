@@ -17,6 +17,7 @@ namespace Breakout
         Ball ball;
         Vector2 ballStartingPosition;
         Vector2 ballStartingDirection;
+        Random randomCollisionDirection;
 
         //variables for the brick
         Vector2 brickStartingPosition;
@@ -34,6 +35,7 @@ namespace Breakout
         {
 
             int centerPosition = Window.ClientBounds.Width / 2;
+            
             //initializing the player block
             Texture2D playerTexture = Content.Load<Texture2D>(@"player");
 
@@ -84,14 +86,23 @@ namespace Breakout
             player.Move(keys, Window.ClientBounds.Width);
             ball.Move(ballStartingDirection);
 
+            if (player.rect.Intersects(ball.rect))
+            {
+                ball.movementX = randomCollisionDirection.Next(0, 0);
+                ball.movementY = randomCollisionDirection.Next(0, 10);
+            }
+
+
             if (ball.position.X < 0 || ball.position.X + ball.texture.Width > Window.ClientBounds.Width)
             {
-                ball.speedX *= -1;
+                ball.movementX *= -1;
             }
             if (ball.position.Y < 0 || ball.position.Y + ball.texture.Height > Window.ClientBounds.Height)
             {
-                ball.speedY *= -1;
+                ball.movementY *= -1;
             }
+
+
 
             base.Update(gameTime);
         }
