@@ -25,6 +25,7 @@ namespace Breakout
         Brick brick;
         Vector2 brickStartingPosition;
         List<Brick> bricks = new List<Brick>();
+        Brick[,]brickArray = new Brick[8,14];
 
 
         public Game1()
@@ -49,13 +50,15 @@ namespace Breakout
             _graphics.PreferredBackBufferWidth = brickTexture.Width * 14;
             _graphics.ApplyChanges();
 
-            //fills top part of the screen with bricks
+            FillBlocks(brickTexture);
+            
+            /* //fills top part of the screen with bricks
             for (int i = 0; i < 14; i++)
             {
                 brick = new Brick(brickTexture, brickStartingPosition);
                 bricks.Add(brick);
                 brickStartingPosition.X += brickTexture.Width;
-            }
+            }*/
 
 
             //initializing the player block
@@ -115,11 +118,14 @@ namespace Breakout
             }
             if (ball.position.Y + ball.texture.Height >  Window.ClientBounds.Height)
             {
-                Exit();
+                ball.movementY *= -1;
             }
 
             //collision between ball and bricks
-            for (int index = 0; index < bricks.Count; index++)
+            CheckCollision();
+            
+            
+            /*for (int index = 0; index < bricks.Count; index++)
             {
                 if (bricks[index].rect.Intersects(ball.rect))
                 {
@@ -128,29 +134,70 @@ namespace Breakout
                     ball.movementY *= -1;
                     points++;
                 }
-            }
+            }*/
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
+            Brick currentBrick;
             GraphicsDevice.Clear(Color.Black);
 
             _spriteBatch.Begin();
             player.Draw(_spriteBatch);
             ball.Draw(_spriteBatch);
 
-            foreach (var brick in bricks)
+            for (int row = 0; row < 8; row++)
             {
-                if (brick.isAlive)
+                for (int col = 0; col < 14; col++)
                 {
-                    brick.Draw(_spriteBatch);
+                    currentBrick = brickArray[row, col];
+                    if (currentBrick.isAlive)
+                    {
+                        currentBrick = brickArray[row, col];
+                        currentBrick.Draw(_spriteBatch);
+                    }
                 }
             }
             _spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        protected void FillBlocks(Texture2D brickTexture)
+        {
+            Vector2 changedPosition = brickStartingPosition;
+            for (int row = 0; row < 8; row++)
+            {
+                for (int col = 0; col < 14; col++)
+                {
+                    brick = new(brickTexture, changedPosition);
+                    brickArray[row, col] = brick;
+                    changedPosition.X += brickTexture.Width;
+                }
+                changedPosition.X = 0;
+                changedPosition.Y += brickTexture.Height;
+            }
+
+        }
+
+        protected void CheckCollision()
+        {
+            Brick currentBrick;
+            for (int row = 0; row < 8; row++)
+            {
+                for (int col = 0; col < 14; col++)
+                {
+                    currentBrick = brickArray[row, col];
+                    if (currentBrick.rect.Intersects(ball.rect))
+                    {
+                        currentBrick.isAlive = false;
+                        currentBrick.rect.Offset(1000, 1000);
+                        ball.movementY *= -1;
+                    }
+                }
+            }
         }
     }
 }
