@@ -14,6 +14,7 @@ namespace Breakout
         //player and player stats
         Player player;
         int points;
+        int ballsAlive = 3;
 
         //variables for the ball
         Ball ball;
@@ -24,9 +25,15 @@ namespace Breakout
         //variables for the brick
         Brick brick;
         Vector2 brickStartingPosition;
-        List<Brick> bricks = new List<Brick>();
         Brick[,]brickArray = new Brick[8,14];
+        Texture2D blueBrickTexture;
+        Texture2D greenBrickTexture;
+        Texture2D purpleBrickTexture;
+        //List<Brick> bricks = new List<Brick>();
 
+        //font settings
+        SpriteFont spriteFont;
+        Vector2 pointDisplayPos = new Vector2(0, 410);
 
         public Game1()
         {
@@ -51,7 +58,6 @@ namespace Breakout
             _graphics.ApplyChanges();
 
             FillBlocks(brickTexture);
-            
             /* //fills top part of the screen with bricks
             for (int i = 0; i < 14; i++)
             {
@@ -79,6 +85,11 @@ namespace Breakout
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            //container for all the non default brick textures
+            blueBrickTexture = Content.Load<Texture2D>(@"bluebrick");
+            greenBrickTexture = Content.Load<Texture2D>(@"greenbrick");
+            purpleBrickTexture = Content.Load<Texture2D>(@"purplebrick");
+            spriteFont = Content.Load<SpriteFont>("spritefont1");
         }
 
         protected override void Update(GameTime gameTime)
@@ -89,7 +100,12 @@ namespace Breakout
             var keys = Keyboard.GetState();
 
             //console title
-            Window.Title = $"Breakout {points} points";
+            Window.Title = $"Breakout {points} points {ballsAlive} lives left";
+
+            if (ballsAlive == 0)
+            {
+                Exit();
+            }
 
             //player movement
             player.Move(keys, Window.ClientBounds.Width);
@@ -118,7 +134,10 @@ namespace Breakout
             }
             if (ball.position.Y + ball.texture.Height >  Window.ClientBounds.Height)
             {
-                ball.movementY *= -1;
+                ball.position = ballStartingPosition;
+                ball.movementX = ball.speed;
+                ball.movementY = ball.speed;
+                ballsAlive--;
             }
 
             //collision between ball and bricks
@@ -145,6 +164,7 @@ namespace Breakout
             GraphicsDevice.Clear(Color.Black);
 
             _spriteBatch.Begin();
+            _spriteBatch.DrawString(spriteFont, points.ToString(), pointDisplayPos, Color.Aqua, 0, Vector2.Zero, 2, SpriteEffects.None, 1);
             player.Draw(_spriteBatch);
             ball.Draw(_spriteBatch);
 
@@ -168,16 +188,19 @@ namespace Breakout
         protected void FillBlocks(Texture2D brickTexture)
         {
             Vector2 changedPosition = brickStartingPosition;
+            int currentBrickPointValue = 16; //different points are given depending on which row the blocks are
             for (int row = 0; row < 8; row++)
             {
                 for (int col = 0; col < 14; col++)
                 {
-                    brick = new(brickTexture, changedPosition);
+                    brick = new(brickTexture, changedPosition, currentBrickPointValue);
                     brickArray[row, col] = brick;
                     changedPosition.X += brickTexture.Width;
                 }
+                //changing position for the next row of blocks and giving them a lesser point value
                 changedPosition.X = 0;
                 changedPosition.Y += brickTexture.Height;
+                currentBrickPointValue -= 2;
             }
 
         }
@@ -193,8 +216,9 @@ namespace Breakout
                     if (currentBrick.rect.Intersects(ball.rect))
                     {
                         currentBrick.isAlive = false;
-                        currentBrick.rect.Offset(1000, 1000);
+                        currentBrick.rect.Offset(1000, 1000); //moves the hitbox out of bounds to "unload" the dead brick
                         ball.movementY *= -1;
+                        points += currentBrick.pointValue;
                     }
                 }
             }

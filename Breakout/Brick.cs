@@ -12,10 +12,11 @@ namespace Breakout
     {
         public bool isAlive = true;
         public int pointValue;
-        public Brick(Texture2D texture, Vector2 position) : base(texture, position)
+        public Brick(Texture2D texture, Vector2 position, int pointValue) : base(texture, position)
         {
             this.texture = texture;
             this.position = position;
+            this.pointValue = pointValue;
         }
 
         public void UpdateBricks()
