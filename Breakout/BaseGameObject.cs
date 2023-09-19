@@ -23,7 +23,7 @@ namespace Breakout
 
         public Rectangle GetRectangle()
         {
-            rect = rect = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
+            rect = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
             return rect;
         }
 

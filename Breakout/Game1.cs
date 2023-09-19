@@ -6,10 +6,27 @@ using System.Collections.Generic;
 
 namespace Breakout
 {
+    enum GameStates
+    {
+        GameStartScreen,
+        GamePlayScreen,
+        GameOverScreen
+    }
+
     public class Game1 : Game
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+
+        //Gamestates and different screens
+        GameStates currentState;
+        Texture2D gameOverScreen;
+        Texture2D gameStartScreen;
+
+        //Start button in intro screen
+        Texture2D startButton;
+        Vector2 startButtonPos;
+        Rectangle StartButtonRect;
 
         //player and player stats
         Player player;
@@ -26,9 +43,7 @@ namespace Breakout
         Brick brick;
         Vector2 brickStartingPosition;
         Brick[,]brickArray = new Brick[8,14];
-        Texture2D blueBrickTexture;
-        Texture2D greenBrickTexture;
-        Texture2D purpleBrickTexture;
+        Texture2D brickBorder;
         //List<Brick> bricks = new List<Brick>();
 
         //font settings
@@ -39,7 +54,7 @@ namespace Breakout
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = false;
+            IsMouseVisible = true;
         }
 
         protected override void Initialize()
@@ -47,17 +62,27 @@ namespace Breakout
             //initializing the point counter
             points = 0;
 
-            int centerPosition = Window.ClientBounds.Width / 2;
-
             //initializing the bricks
             Texture2D brickTexture = Content.Load<Texture2D>(@"brick");
             brickStartingPosition = Vector2.Zero;
+
+            FillBlocks(brickTexture);
 
             //changing window size to fit the bricks
             _graphics.PreferredBackBufferWidth = brickTexture.Width * 14;
             _graphics.ApplyChanges();
 
-            FillBlocks(brickTexture);
+            int centerPosition = Window.ClientBounds.Width / 2;
+
+            //setting up start button
+            startButton = Content.Load<Texture2D>(@"spacecraft");
+            startButtonPos = new Vector2(centerPosition - startButton.Width / 2, Window.ClientBounds.Height / 2 - startButton.Height / 2);
+            StartButtonRect = new Rectangle((int)startButtonPos.X, (int)startButtonPos.Y, startButton.Width, startButton.Height);
+
+
+            //setting the starting Gamestate
+            currentState = GameStates.GameStartScreen;
+
             /* //fills top part of the screen with bricks
             for (int i = 0; i < 14; i++)
             {
@@ -85,11 +110,10 @@ namespace Breakout
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            //container for all the non default brick textures
-            blueBrickTexture = Content.Load<Texture2D>(@"bluebrick");
-            greenBrickTexture = Content.Load<Texture2D>(@"greenbrick");
-            purpleBrickTexture = Content.Load<Texture2D>(@"purplebrick");
+            brickBorder = Content.Load<Texture2D>(@"brickborder");
             spriteFont = Content.Load<SpriteFont>("spritefont1");
+            gameOverScreen = Content.Load<Texture2D>(@"gameoverscreen");
+            gameStartScreen = Content.Load<Texture2D>(@"gamestartscreen");
         }
 
         protected override void Update(GameTime gameTime)
@@ -102,42 +126,53 @@ namespace Breakout
             //console title
             Window.Title = $"Breakout {points} points {ballsAlive} lives left";
 
+            //checks if the player has lost
             if (ballsAlive == 0)
             {
-                Exit();
+                currentState = GameStates.GameOverScreen;
             }
 
-            //player movement
-            player.Move(keys, Window.ClientBounds.Width);
-            player.UpdateRectanglePosition();
-
-            //ball movement
-            ball.Move(ballStartingDirection);
-            ball.UpdateRectanglePosition();
-
-            //collision between player and ball
-            if (player.rect.Intersects(ball.rect))
+            //intro screen
+            if (currentState == GameStates.GameStartScreen)
             {
-                double randomBounce = randomDirection.Next(1, 6);
-                ball.movementX = (float)randomBounce * -1;
-                ball.movementY *= -1;
+                MouseState mouse;
             }
 
-            //collision between ball and screen
-            if (ball.position.X < 0 || ball.position.X + ball.texture.Width > Window.ClientBounds.Width)
+            //Gamestate playíng
+            if (currentState == GameStates.GamePlayScreen)
             {
-                ball.movementX *= -1;
-            }
-            if (ball.position.Y < 0)
-            {
-                ball.movementY *= -1;
-            }
-            if (ball.position.Y + ball.texture.Height >  Window.ClientBounds.Height)
-            {
-                ball.position = ballStartingPosition;
-                ball.movementX = ball.speed;
-                ball.movementY = ball.speed;
-                ballsAlive--;
+                //collision between player and ball. The bounce is randomized
+                if (player.rect.Intersects(ball.rect))
+                {
+                    double randomBounce = randomDirection.Next(1, 6);
+                    ball.movementX = (float)randomBounce * -1;
+                    ball.movementY *= -1;
+                }
+
+                //player movement
+                player.Move(keys, Window.ClientBounds.Width);
+                player.UpdateRectanglePosition();
+
+                //ball movement
+                ball.Move(ballStartingDirection);
+                ball.UpdateRectanglePosition();
+
+                //collision between ball and screen
+                if (ball.position.X < 0 || ball.position.X + ball.texture.Width > Window.ClientBounds.Width)
+                {
+                    ball.movementX *= -1;
+                }
+                else if (ball.position.Y < 0)
+                {
+                    ball.movementY *= -1;
+                }
+                else if (ball.position.Y + ball.texture.Height > Window.ClientBounds.Height)
+                {
+                    ball.position = ballStartingPosition;
+                    ball.movementX = ball.speed;
+                    ball.movementY = ball.speed;
+                    ballsAlive--;
+                }
             }
 
             //collision between ball and bricks
@@ -160,14 +195,35 @@ namespace Breakout
 
         protected override void Draw(GameTime gameTime)
         {
-            Brick currentBrick;
             GraphicsDevice.Clear(Color.Black);
 
             _spriteBatch.Begin();
             _spriteBatch.DrawString(spriteFont, points.ToString(), pointDisplayPos, Color.Aqua, 0, Vector2.Zero, 2, SpriteEffects.None, 1);
-            player.Draw(_spriteBatch);
-            ball.Draw(_spriteBatch);
 
+            if(currentState == GameStates.GameStartScreen)
+            {
+                _spriteBatch.Draw(startButton, startButtonPos, Color.White);
+                //_spriteBatch.Draw(gameStartScreen, Vector2.Zero, Color.White);
+            }
+            else if (currentState == GameStates.GamePlayScreen)
+            {
+                player.Draw(_spriteBatch);
+                ball.Draw(_spriteBatch);
+                DrawBlocks();
+            }
+            else if(currentState == GameStates.GameOverScreen)
+            {
+                _spriteBatch.Draw(gameOverScreen, Vector2.Zero, Color.White);
+            }
+            _spriteBatch.End();
+
+            base.Draw(gameTime);
+        }
+
+        protected void DrawBlocks()
+        {
+            Brick currentBrick;
+            
             for (int row = 0; row < 8; row++)
             {
                 for (int col = 0; col < 14; col++)
@@ -177,23 +233,23 @@ namespace Breakout
                     {
                         currentBrick = brickArray[row, col];
                         currentBrick.Draw(_spriteBatch);
+                        _spriteBatch.Draw(brickBorder, currentBrick.position, Color.White);
                     }
                 }
             }
-            _spriteBatch.End();
-
-            base.Draw(gameTime);
         }
 
         protected void FillBlocks(Texture2D brickTexture)
         {
             Vector2 changedPosition = brickStartingPosition;
             int currentBrickPointValue = 16; //different points are given depending on which row the blocks are
+            Color currentBlockColor;
             for (int row = 0; row < 8; row++)
             {
                 for (int col = 0; col < 14; col++)
                 {
-                    brick = new(brickTexture, changedPosition, currentBrickPointValue);
+                    currentBlockColor = ColorBlocks(row);
+                    brick = new(brickTexture, changedPosition, currentBrickPointValue, currentBlockColor);
                     brickArray[row, col] = brick;
                     changedPosition.X += brickTexture.Width;
                 }
@@ -203,6 +259,30 @@ namespace Breakout
                 currentBrickPointValue -= 2;
             }
 
+        }
+
+        protected Color ColorBlocks(int rowNumber)
+        {
+            Color blockColor;
+
+            if (rowNumber < 2)
+            {
+                blockColor = Color.Red;
+            }
+            else if (rowNumber < 4)
+            {
+                blockColor = Color.Magenta;
+            }
+            else if (rowNumber < 6)
+            {
+                blockColor = Color.Aqua;
+            }
+            else
+            {
+                blockColor = Color.Green;
+            }
+
+            return blockColor;
         }
 
         protected void CheckCollision()

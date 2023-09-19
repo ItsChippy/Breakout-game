@@ -12,11 +12,13 @@ namespace Breakout
     {
         public bool isAlive = true;
         public int pointValue;
-        public Brick(Texture2D texture, Vector2 position, int pointValue) : base(texture, position)
+        public Color color;
+        public Brick(Texture2D texture, Vector2 position, int pointValue, Color color) : base(texture, position)
         {
             this.texture = texture;
             this.position = position;
             this.pointValue = pointValue;
+            this.color = color;
         }
 
         public void UpdateBricks()
@@ -26,7 +28,7 @@ namespace Breakout
 
         public void Draw(SpriteBatch sprite) 
         {
-                sprite.Draw(texture, position, Color.White);
+                sprite.Draw(texture, position, color);
         }
     }
 }
