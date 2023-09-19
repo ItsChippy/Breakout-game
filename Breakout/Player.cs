@@ -35,14 +35,14 @@ namespace Breakout
                 direction = new Vector2(mouse.X, position.Y);
                 position = direction;
             }
-            //if (keys.IsKeyDown(Keys.Right) && position.X + texture.Width <= width)
-            //{
-            //    position.X += playerSpeed;
-            //}
-            //if (keys.IsKeyDown(Keys.Left) && position.X >= 0)
-            //{
-            //    position.X -= playerSpeed;
-            //}
+            /*if (keys.IsKeyDown(Keys.Right) && position.X + texture.Width <= width)
+            {
+                position.X += playerSpeed;
+            }
+            if (keys.IsKeyDown(Keys.Left) && position.X >= 0)
+            {
+               position.X -= playerSpeed;
+            }*/
         }
 
     }

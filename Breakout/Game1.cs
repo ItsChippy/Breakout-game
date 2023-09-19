@@ -26,7 +26,7 @@ namespace Breakout
         //Start button in intro screen
         Texture2D startButton;
         Vector2 startButtonPos;
-        Rectangle StartButtonRect;
+        Rectangle startButtonRect;
 
         //player and player stats
         Player player;
@@ -77,7 +77,7 @@ namespace Breakout
             //setting up start button
             startButton = Content.Load<Texture2D>(@"spacecraft");
             startButtonPos = new Vector2(centerPosition - startButton.Width / 2, Window.ClientBounds.Height / 2 - startButton.Height / 2);
-            StartButtonRect = new Rectangle((int)startButtonPos.X, (int)startButtonPos.Y, startButton.Width, startButton.Height);
+            startButtonRect = new Rectangle((int)startButtonPos.X, (int)startButtonPos.Y, startButton.Width, startButton.Height);
 
 
             //setting the starting Gamestate
@@ -135,7 +135,12 @@ namespace Breakout
             //intro screen
             if (currentState == GameStates.GameStartScreen)
             {
-                MouseState mouse;
+                MouseState mouse = Mouse.GetState();
+
+                if (startButtonRect.Contains(mouse.X, mouse.Y) && mouse.LeftButton == ButtonState.Pressed)
+                {
+                    currentState = GameStates.GamePlayScreen;
+                }
             }
 
             //Gamestate playíng
@@ -173,10 +178,11 @@ namespace Breakout
                     ball.movementY = ball.speed;
                     ballsAlive--;
                 }
+
+                //collision between ball and bricks
+                CheckCollision();
             }
 
-            //collision between ball and bricks
-            CheckCollision();
             
             
             /*for (int index = 0; index < bricks.Count; index++)
