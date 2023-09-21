@@ -30,7 +30,7 @@ namespace Breakout
         public void Move(KeyboardState keys, int width)
         {
             mouse = Mouse.GetState();
-            if (mouse.X + texture.Width <= width || mouse.X >=0)
+            if (position.X + texture.Width <= width || mouse.X >=0)
             {
                 direction = new Vector2(mouse.X, position.Y);
                 position = direction;

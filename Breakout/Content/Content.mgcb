@@ -13,6 +13,18 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin background.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:background.jpg
+
 #begin ball.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -73,7 +85,7 @@
 /processorParam:TextureFormat=Color
 /build:player.png
 
-#begin spacecraft.png
+#begin sharks.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -83,7 +95,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:spacecraft.png
+/build:sharks.png
 
 #begin spritefont1.spritefont
 /importer:FontDescriptionImporter
@@ -103,16 +115,4 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:startbutton.png
-
-#begin startmenubackground.jpg
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:startmenubackground.jpg
 
