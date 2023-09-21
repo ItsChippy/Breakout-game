@@ -21,11 +21,6 @@ namespace Breakout
             this.color = color;
         }
 
-        public void UpdateBricks()
-        {
-
-        }
-
         public void Draw(SpriteBatch sprite) 
         {
                 sprite.Draw(texture, position, color);

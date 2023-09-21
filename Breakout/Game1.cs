@@ -21,9 +21,8 @@ namespace Breakout
 
         //Gamestates and different screens
         GameState currentState;
-        Texture2D gameOverBackground;
-        Texture2D startMenuBackground;
-        Vector2 startMenuBackgroundPos;
+        Texture2D backgroundTexture;
+        Vector2 backGroundPos;
 
         //text in startmenu
         string startMenuText = "Breakout by Logan";
@@ -45,15 +44,21 @@ namespace Breakout
         double frameInterval = 100;
         Rectangle sharkSpriteRect;
 
-        //points and lives display
-        Vector2 pointDisplayPos;
-        StringBuilder sbPointDisplay = new StringBuilder();
+        //end game screen
+        int numOfFishes = 5;
+        Texture2D fishTexture;
+        Fish[] arrayOfFishes;
+        Random randFishPlacement = new Random();
 
+        //points and lives display
+        Vector2 pointDisplayPos = new(0, 410);
+        StringBuilder sbPointDisplay = new StringBuilder();
 
         //player and player stats
         Player player;
         int points;
         int ballsAlive = 3;
+        float timeInGame;
 
         //variables for the ball
         Ball ball;
@@ -66,7 +71,7 @@ namespace Breakout
         Vector2 brickStartingPosition;
         int numOfRows = 8;
         int numOfCols = 14;
-        Brick[,]brickArray = new Brick[8,14];
+        Brick[,]brickArray;
         Texture2D brickBorder;
 
         //font settings
@@ -88,7 +93,7 @@ namespace Breakout
             //initializing the bricks
             Texture2D brickTexture = Content.Load<Texture2D>(@"brick");
             brickStartingPosition = Vector2.Zero;
-
+            brickArray = new Brick[numOfRows, numOfCols];
             FillBlocks(brickTexture);
 
             //changing window size to fit the bricks
@@ -101,9 +106,8 @@ namespace Breakout
 
             //setting up start menu background
             startMenuTextPos = new(centerPositionX, 20);
-            startMenuBackground = Content.Load<Texture2D>(@"background");
-            startMenuBackgroundPos = CalculateCenterPositioning(centerPositionX, centerPositionY, startMenuBackground);
-
+            backgroundTexture = Content.Load<Texture2D>(@"background");
+            backGroundPos = CalculateCenterPositioning(centerPositionX, centerPositionY, backgroundTexture);
 
             //setting up start button
             startButtonColor = Color.Gray;
@@ -115,7 +119,9 @@ namespace Breakout
             currentState = GameState.StartMenu;
 
             //Initializing the point display and lives left string
-            sbPointDisplay.Append("Points: X");
+            sbPointDisplay.Append($"Points: {points}" +
+                                 $"\nLives left: {ballsAlive}" +
+                                 $"\nTime: {timeInGame}");
 
             //initializing the player block
             Texture2D playerTexture = Content.Load<Texture2D>(@"player");
@@ -138,12 +144,15 @@ namespace Breakout
             brickBorder = Content.Load<Texture2D>(@"brickborder");
             spriteFont = Content.Load<SpriteFont>("spritefont1");
 
+            //end screen fishes
+            fishTexture = Content.Load<Texture2D>(@"goldfish");
+            arrayOfFishes = new Fish[numOfFishes];
+            FillFishArray();
+
             //shark animation
             sharkSpriteSheet = Content.Load<Texture2D>(@"sharks");
             sharkSpriteRect = new Rectangle(0, 0, sharkSpriteWidth, sharkSpriteHeight);
             sharkPos = new Vector2(100, 350);
-
-            gameOverBackground = Content.Load<Texture2D>(@"background");
         }
 
         protected override void Update(GameTime gameTime)
@@ -164,7 +173,7 @@ namespace Breakout
                     break;
 
                 case GameState.Playing:
-                    PlayingUpdate();
+                    PlayingUpdate(gameTime);
                     break;
 
                 case GameState.GameOver:
@@ -218,7 +227,7 @@ namespace Breakout
                     sharkFrame = 0;
                     sharkSpriteRect.Y += sharkSpriteRect.Y;
                 }
-                if (sharkFrame > 13)
+                if (sharkFrame > 12)
                 {
                     sharkFrame = 0;
                     sharkSpriteRect.Y -= sharkSpriteRect.Y;
@@ -242,15 +251,14 @@ namespace Breakout
             }
         }
 
-        protected void PlayingUpdate()
+        protected void PlayingUpdate(GameTime gameTime)
         {
+            timeInGame = gameTime.ElapsedGameTime.Seconds;
             var keys = Keyboard.GetState();
             IsMouseVisible = false;
-            //collision between player and ball. The bounce is randomized
+            //collision between player and ball.
             if (player.rect.Intersects(ball.rect))
             {
-                double randomBounce = randomDirection.Next(1, 3);
-                ball.movementX = (float)randomBounce * -1;
                 ball.movementY *= -1;
             }
 
@@ -281,6 +289,11 @@ namespace Breakout
 
             //collision between ball and bricks
             CheckCollision();
+
+            sbPointDisplay.Clear();
+            sbPointDisplay.Append($"Points: {points}" +
+                                 $"\nLives left: {ballsAlive}" +
+                                 $"\nTime: {timeInGame}");
         }
 
         protected void GameOverUpdate()
@@ -295,13 +308,12 @@ namespace Breakout
             _spriteBatch.DrawString(spriteFont, startMenuText, startMenuTextPos, Color.Black, 0, textMiddlePoint, 1.5f, SpriteEffects.None, 0.1f);
             _spriteBatch.Draw(sharkSpriteSheet, sharkPos, sharkSpriteRect, Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0.1f);
             _spriteBatch.Draw(startButtonTexture, startButtonPos, null, startButtonColor, 0, Vector2.Zero, 1, SpriteEffects.None, 0.1f);
-            _spriteBatch.Draw(startMenuBackground, startMenuBackgroundPos, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            _spriteBatch.Draw(backgroundTexture, backGroundPos, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
         }
 
         protected void PlayingDraw()
         {
-            sbPointDisplay.Replace("X", points.ToString());
-            _spriteBatch.DrawString(spriteFont, sbPointDisplay, pointDisplayPos, Color.Aqua);
+            _spriteBatch.DrawString(spriteFont, sbPointDisplay, pointDisplayPos, Color.White);
             player.Draw(_spriteBatch);
             ball.Draw(_spriteBatch);
             DrawBlocks();
@@ -309,7 +321,27 @@ namespace Breakout
 
         protected void GameOverDraw()
         {
-            _spriteBatch.Draw(gameOverBackground, Vector2.Zero, Color.White);
+            _spriteBatch.Draw(backgroundTexture, backGroundPos, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            foreach (Fish fish in arrayOfFishes)
+            {
+                fish.Draw(_spriteBatch);
+            }
+        }
+
+        protected void FillFishArray()
+        {
+            int screenEdgeX = Window.ClientBounds.Width - fishTexture.Width;
+            int screenEdgeY = Window.ClientBounds.Height - fishTexture.Height;
+            Vector2 currentFishPos;
+            Fish currentFish;
+
+            for (int i = 0; i < arrayOfFishes.Length; i++)
+            {
+                currentFishPos.X = randFishPlacement.Next(0, screenEdgeX);
+                currentFishPos.Y = randFishPlacement.Next(0, screenEdgeY);
+                currentFish = new Fish(fishTexture, currentFishPos);
+                arrayOfFishes[i] = currentFish;
+            }
         }
 
         protected void DrawBlocks()
@@ -335,7 +367,7 @@ namespace Breakout
         {
             Vector2 changedPosition = brickStartingPosition;
             int currentBrickPointValue = 16; //different points are given depending on which row the blocks are
-            int rowPointDifference = 2; //every row has a 2 point difference, the top row having the highest
+            int rowPointDifference = 2; //every row has a 2 point difference, the top row having the highest amount
             Color currentBlockColor;
             for (int row = 0; row < numOfRows; row++)
             {
