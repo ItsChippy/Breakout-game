@@ -50,6 +50,10 @@ namespace Breakout
         Fish[] arrayOfFishes;
         Random randFishPlacement = new Random();
 
+        //end game screen text
+        Vector2 gameOverTextPos;
+        string gameOverText;
+
         //points and lives display
         Vector2 pointDisplayPos = new(0, 410);
         StringBuilder sbPointDisplay = new StringBuilder();
@@ -58,13 +62,12 @@ namespace Breakout
         Player player;
         int points;
         int ballsAlive = 3;
-        float timeInGame;
+        int timeInGame;
 
         //variables for the ball
         Ball ball;
         Vector2 ballStartingPosition;
         Vector2 ballStartingDirection;
-        Random randomDirection = new Random();
 
         //variables for the brick and brick array
         Brick brick;
@@ -112,16 +115,14 @@ namespace Breakout
             //setting up start button
             startButtonColor = Color.Gray;
             startButtonTexture = Content.Load<Texture2D>(@"startbutton");
-            startButtonPos = new Vector2(centerPositionX - startButtonTexture.Width / 2, Window.ClientBounds.Height / 2 - startButtonTexture.Height / 2);
+            startButtonPos = CalculateCenterPositioning(centerPositionX, centerPositionY, startButtonTexture);
             startButtonRect = new Rectangle((int)startButtonPos.X, (int)startButtonPos.Y, startButtonTexture.Width, startButtonTexture.Height);
 
             //setting the starting Gamestate
             currentState = GameState.StartMenu;
 
-            //Initializing the point display and lives left string
-            sbPointDisplay.Append($"Points: {points}" +
-                                 $"\nLives left: {ballsAlive}" +
-                                 $"\nTime: {timeInGame}");
+            //end game screen text position
+            gameOverTextPos = new Vector2(centerPositionX, centerPositionY);
 
             //initializing the player block
             Texture2D playerTexture = Content.Load<Texture2D>(@"player");
@@ -161,10 +162,14 @@ namespace Breakout
                 Exit();
 
             //checks if the player has lost
-            if (ballsAlive == 0)
+            if (ballsAlive == 0 || timeInGame == 25)
             {
                 currentState = GameState.GameOver;
+                gameOverText = "You lost!" +
+                                $"\nTotal Points: {points}" +
+                                $"\nTotal Game Time: {timeInGame}";
             }
+            
             
             switch(currentState)
             {
@@ -253,9 +258,10 @@ namespace Breakout
 
         protected void PlayingUpdate(GameTime gameTime)
         {
-            timeInGame = gameTime.ElapsedGameTime.Seconds;
+            timeInGame = gameTime.TotalGameTime.Seconds;
             var keys = Keyboard.GetState();
             IsMouseVisible = false;
+
             //collision between player and ball.
             if (player.rect.Intersects(ball.rect))
             {
@@ -293,7 +299,7 @@ namespace Breakout
             sbPointDisplay.Clear();
             sbPointDisplay.Append($"Points: {points}" +
                                  $"\nLives left: {ballsAlive}" +
-                                 $"\nTime: {timeInGame}");
+                                 $"\nTime: {timeInGame} seconds");
         }
 
         protected void GameOverUpdate()
@@ -303,7 +309,7 @@ namespace Breakout
 
         protected void StartMenuDraw()
         {
-            Vector2 textMiddlePoint = spriteFont.MeasureString(startMenuText) / 2;  
+            Vector2 textMiddlePoint = CalculateTextMiddlePoint(startMenuText);  
             
             _spriteBatch.DrawString(spriteFont, startMenuText, startMenuTextPos, Color.Black, 0, textMiddlePoint, 1.5f, SpriteEffects.None, 0.1f);
             _spriteBatch.Draw(sharkSpriteSheet, sharkPos, sharkSpriteRect, Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0.1f);
@@ -321,6 +327,9 @@ namespace Breakout
 
         protected void GameOverDraw()
         {
+            Vector2 textMiddlePoint = CalculateTextMiddlePoint(gameOverText);
+
+            _spriteBatch.DrawString(spriteFont, gameOverText, gameOverTextPos, Color.Black, 0, textMiddlePoint, 1.5f, SpriteEffects.None, 0.1f);
             _spriteBatch.Draw(backgroundTexture, backGroundPos, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
             foreach (Fish fish in arrayOfFishes)
             {
@@ -435,9 +444,32 @@ namespace Breakout
             }
         }
 
+        protected bool CheckIfWin()
+        {
+            Brick currentBrick;
+            for (int row = 0;row < numOfRows; row++)
+            {
+                for (int col = 0;col < numOfCols; col++)
+                {
+                    currentBrick = brickArray[row, col];
+                    if (currentBrick.isAlive)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         protected Vector2 CalculateCenterPositioning(int centerPositionX, int centerPositionY, Texture2D texture)
         {
             return new Vector2(centerPositionX - texture.Width / 2, centerPositionY - texture.Height / 2);
+        }
+
+        protected Vector2 CalculateTextMiddlePoint(string inputString)
+        {
+            Vector2 textMiddlePoint = spriteFont.MeasureString(inputString) / 2;
+            return textMiddlePoint;
         }
     }
 }
