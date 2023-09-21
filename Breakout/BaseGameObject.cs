@@ -18,13 +18,7 @@ namespace Breakout
         {
             this.texture = texture;
             this.position = position;
-            GetRectangle();
-        }
-
-        public Rectangle GetRectangle()
-        {
             rect = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
-            return rect;
         }
 
         public void UpdateRectanglePosition()

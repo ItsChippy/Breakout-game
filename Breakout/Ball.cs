@@ -11,7 +11,7 @@ namespace Breakout
     internal class Ball : BaseGameObject
     {
 
-        public float speed = 4f;
+        public float speed = 3f;
         public float movementX;
         public float movementY;
 
