@@ -13,6 +13,7 @@ namespace Breakout
         public bool isAlive = true;
         public int pointValue;
         public Color color;
+        
         public Brick(Texture2D texture, Vector2 position, int pointValue, Color color) : base(texture, position)
         {
             this.texture = texture;

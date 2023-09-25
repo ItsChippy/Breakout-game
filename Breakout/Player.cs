@@ -29,10 +29,24 @@ namespace Breakout
 
         public void Move(KeyboardState keys, int width)
         {
-            //mouse controls
             mouse = Mouse.GetState();
-            position = direction;
-            direction.X = mouse.X;
+
+            //mouse controls
+            if (mouse.X != direction.X)
+            {
+                direction.X = mouse.X;
+                position = direction;
+            }
+
+            //keyboard controls
+            if (keys.IsKeyDown(Keys.D) && position.X + texture.Width <= width)
+            {
+                position.X += playerSpeed;
+            }
+            else if (keys.IsKeyDown(Keys.A) && position.X >= 0)
+            {
+                position.X -= playerSpeed;
+            }
 
             if (position.X < 0)
             {
@@ -43,15 +57,6 @@ namespace Breakout
                 position.X = width - texture.Width;
             }
 
-            //keyboard controls
-            if (keys.IsKeyDown(Keys.D) && position.X + texture.Width <= width)
-            {
-                position.X += playerSpeed;
-            }
-            if (keys.IsKeyDown(Keys.A) && position.X >= 0)
-            {
-                position.X -= playerSpeed;
-            }
         }
 
     }

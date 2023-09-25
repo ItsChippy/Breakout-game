@@ -205,7 +205,7 @@ namespace Breakout
                     break;
 
                 case GameState.GameOver:
-                    GameOverUpdate(keys);
+                    GameOverUpdate();
                     break;
             }
 
@@ -325,7 +325,7 @@ namespace Breakout
                                  $"\nTime: {timeInGame:00} seconds");
         }
 
-        protected void GameOverUpdate(KeyboardState keys)
+        protected void GameOverUpdate()
         {
             MouseState mouse = Mouse.GetState();
 
