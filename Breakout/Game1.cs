@@ -25,8 +25,8 @@ namespace Breakout
         Vector2 backGroundPos;
 
         //text in startmenu
-        string startMenuText = "Breakout by Logan";
-        Vector2 startMenuTextPos;
+        string titleText = "Breakout by Logan";
+        Vector2 titleTextPos;
 
         //Start button in startmenu
         Texture2D startButtonTexture;
@@ -53,6 +53,14 @@ namespace Breakout
         //end game screen text
         Vector2 gameOverTextPos;
         string gameOverText;
+
+        //replay button in end game screen
+        Texture2D replayButtonTexture;
+        Vector2 replayButtonPos;
+        Rectangle replayButtonRect;
+        Color replayButtonColor;
+        string replayButtonText;
+        Vector2 replayButtonTextPos;
 
         //points and lives display
         Vector2 pointDisplayPos = new(0, 410);
@@ -108,7 +116,7 @@ namespace Breakout
 
 
             //setting up start menu background
-            startMenuTextPos = new(centerPositionX, 20);
+            titleTextPos = new Vector2(centerPositionX, 20);
             backgroundTexture = Content.Load<Texture2D>(@"background");
             backGroundPos = CalculateCenterPositioning(centerPositionX, centerPositionY, backgroundTexture);
 
@@ -117,6 +125,14 @@ namespace Breakout
             startButtonTexture = Content.Load<Texture2D>(@"startbutton");
             startButtonPos = CalculateCenterPositioning(centerPositionX, centerPositionY, startButtonTexture);
             startButtonRect = new Rectangle((int)startButtonPos.X, (int)startButtonPos.Y, startButtonTexture.Width, startButtonTexture.Height);
+
+            //setting up replay button
+            replayButtonColor = Color.Gray;
+            replayButtonTexture = Content.Load<Texture2D>(@"replaybutton");
+            replayButtonPos = new Vector2(centerPositionX - replayButtonTexture.Width / 2, Window.ClientBounds.Height - replayButtonTexture.Height);
+            replayButtonRect = new Rectangle((int)replayButtonPos.X, (int)replayButtonPos.Y, replayButtonTexture.Width, replayButtonTexture.Height);
+            replayButtonText = "Press to replay!";
+            replayButtonTextPos = new Vector2(centerPositionX, Window.ClientBounds.Height - replayButtonTexture.Height);
 
             //setting the starting Gamestate
             currentState = GameState.StartMenu;
@@ -163,7 +179,7 @@ namespace Breakout
             var keys = Keyboard.GetState();
 
             //checks if the player has lost
-            if (ballsAlive == 0 || timeInGame >= 25)
+            if (ballsAlive == 0)
             {
                 currentState = GameState.GameOver;
                 gameOverText = "You lost!" +
@@ -189,7 +205,7 @@ namespace Breakout
                     break;
 
                 case GameState.GameOver:
-                    GameOverUpdate();
+                    GameOverUpdate(keys);
                     break;
             }
 
@@ -309,16 +325,33 @@ namespace Breakout
                                  $"\nTime: {timeInGame:00} seconds");
         }
 
-        protected void GameOverUpdate()
+        protected void GameOverUpdate(KeyboardState keys)
         {
+            MouseState mouse = Mouse.GetState();
+
+            if (replayButtonRect.Contains(mouse.X, mouse.Y))
+            {
+                replayButtonColor = Color.White;
+
+                if (mouse.LeftButton == ButtonState.Pressed)
+                {
+                    ballsAlive = 3;
+                    Initialize();
+                    currentState = GameState.StartMenu;
+                }
+            }
+            else
+            {
+                replayButtonColor = Color.Gray;
+            }
             IsMouseVisible = true;
         }
 
         protected void StartMenuDraw()
         {
-            Vector2 textMiddlePoint = CalculateTextMiddlePoint(startMenuText);  
+            Vector2 textMiddlePoint = CalculateTextMiddlePoint(titleText);  
             
-            _spriteBatch.DrawString(spriteFont, startMenuText, startMenuTextPos, Color.Black, 0, textMiddlePoint, 1.5f, SpriteEffects.None, 0.1f);
+            _spriteBatch.DrawString(spriteFont, titleText, titleTextPos, Color.Black, 0, textMiddlePoint, 1.5f, SpriteEffects.None, 0.1f);
             _spriteBatch.Draw(sharkSpriteSheet, sharkPos, sharkSpriteRect, Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0.1f);
             _spriteBatch.Draw(startButtonTexture, startButtonPos, null, startButtonColor, 0, Vector2.Zero, 1, SpriteEffects.None, 0.1f);
             _spriteBatch.Draw(backgroundTexture, backGroundPos, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
@@ -335,12 +368,17 @@ namespace Breakout
         protected void GameOverDraw()
         {
             Vector2 textMiddlePoint = CalculateTextMiddlePoint(gameOverText);
+            Vector2 replayTextMiddlePoint = CalculateTextMiddlePoint(replayButtonText);
+            Vector2 titleTextMiddlePoint = CalculateTextMiddlePoint(titleText);
 
-            _spriteBatch.DrawString(spriteFont, gameOverText, gameOverTextPos, Color.Black, 0, textMiddlePoint, 1.5f, SpriteEffects.None, 0.1f);
+            _spriteBatch.DrawString(spriteFont, titleText, titleTextPos, Color.Black, 0, titleTextMiddlePoint, 1.5f, SpriteEffects.None, 0.2f);
+            _spriteBatch.DrawString(spriteFont, gameOverText, gameOverTextPos, Color.Black, 0, textMiddlePoint, 1.5f, SpriteEffects.None, 0.2f);
+            _spriteBatch.DrawString(spriteFont, replayButtonText, replayButtonTextPos, Color.Black, 0, replayTextMiddlePoint, 1.5f, SpriteEffects.None, 0.2f);
             _spriteBatch.Draw(backgroundTexture, backGroundPos, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-            foreach (Fish fish in arrayOfFishes)
+            _spriteBatch.Draw(replayButtonTexture, replayButtonPos, null, replayButtonColor, 0, Vector2.Zero, 1, SpriteEffects.None, 0.2f);
+            for (int i = 0; i < numOfFishes; i++)
             {
-                fish.Draw(_spriteBatch);
+                arrayOfFishes[i].Draw(_spriteBatch);
             }
         }
 

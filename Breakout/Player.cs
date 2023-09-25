@@ -11,7 +11,7 @@ namespace Breakout
 {
     internal class Player : BaseGameObject
     {
-        private float playerSpeed = 8f;
+        private float playerSpeed = 5f;
         MouseState mouse;
         Vector2 direction;
         
@@ -29,19 +29,28 @@ namespace Breakout
 
         public void Move(KeyboardState keys, int width)
         {
+            //mouse controls
             mouse = Mouse.GetState();
-            if (position.X + texture.Width <= width || mouse.X >=0)
+            position = direction;
+            direction.X = mouse.X;
+
+            if (position.X < 0)
             {
-                direction = new Vector2(mouse.X, position.Y);
-                position = direction;
+                position.X = 0;
             }
-            if (keys.IsKeyDown(Keys.Right) && position.X + texture.Width <= width)
+            if (position.X + texture.Width >= width)
+            {
+                position.X = width - texture.Width;
+            }
+
+            //keyboard controls
+            if (keys.IsKeyDown(Keys.D) && position.X + texture.Width <= width)
             {
                 position.X += playerSpeed;
             }
-            if (keys.IsKeyDown(Keys.Left) && position.X >= 0)
+            if (keys.IsKeyDown(Keys.A) && position.X >= 0)
             {
-               position.X -= playerSpeed;
+                position.X -= playerSpeed;
             }
         }
 
