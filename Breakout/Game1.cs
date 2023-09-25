@@ -167,7 +167,7 @@ namespace Breakout
                 currentState = GameState.GameOver;
                 gameOverText = "You lost!" +
                                 $"\nTotal Points: {points}" +
-                                $"\nTotal Game Time: {timeInGame}";
+                                $"\nTotal Game Time: {timeInGame} seconds";
             }
             
             
