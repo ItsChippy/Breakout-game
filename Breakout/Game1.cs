@@ -62,7 +62,7 @@ namespace Breakout
         Player player;
         int points;
         int ballsAlive = 3;
-        int timeInGame;
+        float timeInGame;
 
         //variables for the ball
         Ball ball;
@@ -160,16 +160,23 @@ namespace Breakout
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            var keys = Keyboard.GetState();
 
             //checks if the player has lost
-            if (ballsAlive == 0 || timeInGame == 25)
+            if (ballsAlive == 0 || timeInGame >= 25)
             {
                 currentState = GameState.GameOver;
                 gameOverText = "You lost!" +
                                 $"\nTotal Points: {points}" +
-                                $"\nTotal Game Time: {timeInGame} seconds";
+                                $"\nTotal Game Time: {timeInGame:00} seconds";
             }
-            
+            if (CheckIfWin(keys))
+            {
+                currentState = GameState.GameOver;
+                gameOverText = "You won!" +
+                                $"\nTotal Points: {points}" +
+                                $"\nTotal Game Time: {timeInGame:00} seconds";
+            }
             
             switch(currentState)
             {
@@ -178,7 +185,7 @@ namespace Breakout
                     break;
 
                 case GameState.Playing:
-                    PlayingUpdate(gameTime);
+                    PlayingUpdate(keys, gameTime);
                     break;
 
                 case GameState.GameOver:
@@ -248,6 +255,7 @@ namespace Breakout
                 if (mouse.LeftButton == ButtonState.Pressed)
                 {
                     currentState = GameState.Playing;
+                    timeInGame = 0;
                 }
             }
             else
@@ -256,10 +264,9 @@ namespace Breakout
             }
         }
 
-        protected void PlayingUpdate(GameTime gameTime)
+        protected void PlayingUpdate(KeyboardState keys, GameTime gameTime)
         {
-            timeInGame = gameTime.TotalGameTime.Seconds;
-            var keys = Keyboard.GetState();
+            timeInGame += (float)gameTime.ElapsedGameTime.TotalSeconds;
             IsMouseVisible = false;
 
             //collision between player and ball.
@@ -299,7 +306,7 @@ namespace Breakout
             sbPointDisplay.Clear();
             sbPointDisplay.Append($"Points: {points}" +
                                  $"\nLives left: {ballsAlive}" +
-                                 $"\nTime: {timeInGame} seconds");
+                                 $"\nTime: {timeInGame:00} seconds");
         }
 
         protected void GameOverUpdate()
@@ -444,9 +451,15 @@ namespace Breakout
             }
         }
 
-        protected bool CheckIfWin()
+        protected bool CheckIfWin(KeyboardState keys)
         {
             Brick currentBrick;
+            
+            if(keys.IsKeyDown(Keys.Space))
+            {
+                return true;
+            }
+
             for (int row = 0;row < numOfRows; row++)
             {
                 for (int col = 0;col < numOfCols; col++)
